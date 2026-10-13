@@ -41,6 +41,11 @@ Os cinco arquivos de código precisam ficar **na mesma pasta**: o `iniciar.py` e
 ## Uso rápido
 
 ```bash
+bash iniciar.sh
+```
+ou
+
+```bash
 chmod +x iniciar.sh      # só na primeira vez, se o git não preservou a permissão
 ./iniciar.sh
 ```
