@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Garra G1</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#f5f6f8; --card:#fff; --ink:#0f172a; --muted:#64748b; --line:#e2e8f0;
+  --s1:#e8ecf1; --s2:#cbd3dd; --s3:#94a3b8; --dark:#1e293b;
+  --accent:#ea580c; --ok:#16a34a; --warn:#d97706;
+  --sans:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+@media(prefers-color-scheme:dark){
+  :root{--bg:#0b1018; --card:#121a26; --ink:#e6ebf2; --muted:#8895a7; --line:#223044;
+        --s1:#2a3647; --s2:#3b4a5f; --s3:#6b7c92; --dark:#0b1018}
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1080px;margin:0 auto;padding:32px 24px 48px}
+header{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:24px}
+h1{font-size:20px;font-weight:600;margin:0;letter-spacing:-.01em}
+h1 span{color:var(--muted);font-weight:400}
+.status{display:flex;align-items:center;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.status b{color:var(--ink);font-weight:500}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--s3);margin-right:7px;vertical-align:1px}
+.dot.live{background:var(--ok);box-shadow:0 0 0 3px color-mix(in srgb,var(--ok) 20%,transparent)}
+.dot.warn{background:var(--warn)}
+.grid{display:grid;grid-template-columns:1.35fr 1fr;gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px}
+.label{font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:0 0 14px;display:flex;justify-content:space-between}
+.label em{font-style:normal;text-transform:none;letter-spacing:0}
+.stage{display:flex;align-items:center;justify-content:center;padding:12px}
+.stage svg{width:100%;height:auto;display:block}
+.stack{display:flex;flex-direction:column;gap:16px}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:18px 16px}
+.m small{display:block;color:var(--muted);font-size:12px;margin-bottom:2px}
+.m strong{font-size:26px;font-weight:500;letter-spacing:-.02em}
+.m strong.sm{font-size:20px;line-height:36px}
+.bar{height:4px;background:var(--line);border-radius:2px;overflow:hidden;margin-top:20px}
+.bar i{display:block;height:100%;width:0;background:var(--accent)}
+.key{display:flex;align-items:center;justify-content:center;width:100%;height:64px;font:500 14px var(--sans);letter-spacing:.02em;color:var(--ink);
+  background:var(--card);border:1px solid var(--s2);border-bottom-width:4px;border-radius:10px;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;
+  transition:transform .06s,border-bottom-width .06s,background .12s,border-color .12s}
+.key:hover{border-color:var(--s3)}
+.key.on{background:var(--accent);border-color:var(--accent);color:#fff;border-bottom-width:1px;transform:translateY(3px)}
+.key:disabled{opacity:.45;cursor:not-allowed}
+.key:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.hint{font-size:13px;line-height:1.5;color:var(--muted);margin:14px 0 0}
+.opt{display:flex;align-items:center;gap:8px;margin-top:14px;font-size:13px;color:var(--muted);cursor:pointer}
+.opt input{accent-color:var(--accent)}
+#trace{width:100%;height:64px;display:block}
+#log{height:120px;overflow:auto;margin:0;padding:12px;background:var(--bg);color:var(--muted);border-radius:8px;font:12px/1.6 var(--mono);white-space:pre-wrap}
+#log .tx{color:var(--accent)}
+code{font-family:var(--mono);font-size:.92em}
+/* desenho */
+.f-body{fill:var(--s1);stroke:var(--s2)}
+.f-mid{fill:var(--s2)}
+.f-dark{fill:var(--dark)}
+.f-rail{fill:var(--s3)}
+.f-jaw{fill:var(--s1);stroke:var(--s3)}
+.f-pad{fill:var(--accent)}
+.guide{stroke:var(--s2);stroke-dasharray:4 6}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Garra G1 <span>· pinça paralela</span></h1>
+  <div class="status">
+    <span><i class="dot" id="dot"></i><b id="linkTxt">Simulação</b></span>
+    <span>Porta <b id="portTxt">—</b></span>
+    <span>Serial <b>9600</b></span>
+  </div>
+</header>
+
+<div class="grid">
+  <section class="card stage" aria-label="Modelo da garra paralela">
+    <svg viewBox="0 0 640 400" role="img" aria-label="Pinça robótica com duas mandíbulas retas que deslizam em paralelo">
+      <line class="guide" x1="320" y1="0" x2="320" y2="400"/>
+      <rect class="f-mid" x="290" y="14" width="60" height="48" rx="8"/>
+      <rect class="f-body" x="130" y="62" width="380" height="96" rx="14" stroke-width="1.5"/>
+      <rect class="f-rail" x="150" y="100" width="340" height="4" rx="2"/>
+      <rect class="f-rail" x="150" y="126" width="340" height="4" rx="2"/>
+      <rect class="f-dark" x="296" y="78" width="48" height="26" rx="6"/>
+      <text x="320" y="95.5" text-anchor="middle" font-size="12" font-weight="500" fill="#fff" font-family="Inter,system-ui,sans-serif">A1</text>
+      <rect id="obj" x="246" y="236" width="148" height="92" rx="8" fill="var(--warn)" opacity=".85" style="display:none"/>
+      <g id="jawL">
+        <rect class="f-jaw" x="238" y="92" width="46" height="64" rx="7" stroke-width="1.5"/>
+        <rect class="f-jaw" x="238" y="156" width="40" height="214" rx="7" stroke-width="1.5"/>
+        <rect class="f-pad" x="270" y="234" width="8" height="94" rx="3"/>
+      </g>
+      <g id="jawR">
+        <rect class="f-jaw" x="356" y="92" width="46" height="64" rx="7" stroke-width="1.5"/>
+        <rect class="f-jaw" x="362" y="156" width="40" height="214" rx="7" stroke-width="1.5"/>
+        <rect class="f-pad" x="362" y="234" width="8" height="94" rx="3"/>
+      </g>
+    </svg>
+  </section>
+
+  <aside class="stack">
+    <div class="card">
+      <p class="label">Telemetria</p>
+      <div class="metrics">
+        <div class="m"><small>Ângulo</small><strong id="angTxt">100°</strong></div>
+        <div class="m"><small>Abertura</small><strong id="openTxt">100%</strong></div>
+        <div class="m"><small>Estado</small><strong class="sm" id="stateTxt">Aberta</strong></div>
+        <div class="m"><small>Resposta</small><strong class="sm" id="lastTxt">—</strong></div>
+      </div>
+      <div class="bar" aria-hidden="true"><i id="barFill"></i></div>
+    </div>
+
+    <div class="card">
+      <p class="label">Comando <em id="cmdMode">simulação</em></p>
+      <button class="key" id="bGrip" aria-label="Segurar para fechar a garra">Espaço</button>
+      <p class="hint" id="cmdHint">Segure a barra de espaço para fechar. Ao soltar, a garra abre.</p>
+      <label class="opt"><input type="checkbox" id="objChk"> Simular objeto (só na simulação)</label>
+    </div>
+
+    <div class="card">
+      <p class="label">Histórico do ângulo</p>
+      <svg id="trace" viewBox="0 0 240 70" preserveAspectRatio="none"><polyline id="line" fill="none" stroke="var(--accent)" stroke-width="1.5" vector-effect="non-scaling-stroke" points=""/></svg>
+    </div>
+
+    <div class="card">
+      <p class="label">Registro</p>
+      <pre id="log" aria-live="polite"></pre>
+    </div>
+  </aside>
+</div>
+</div>
+
+<script>
+const OPEN = 100, CLOSE = 20, RANGE = OPEN - CLOSE;   /* curso real da garra: 20° (fechada) a 100° (aberta) */
+const $ = id => document.getElementById(id);
+/* Servidor do emissor.py. Se a página for aberta por ele, a URL é a mesma origem. */
+const API = location.protocol.startsWith('http') ? '' : 'http://localhost:8765';
+let target = OPEN, shown = OPEN, live = false, holding = false, contact = false, since = 0;
+/* Comandos só funcionam se a página foi aberta pelo servidor do emissor.py (http://localhost:8765/) */
+const canControl = location.protocol.startsWith('http');
+let pressed = false, hbTimer = null, seq = Date.now() * 1000;
+function post(path){
+  const url = API + path + (path.includes('?') ? '&' : '?') + 'n=' + (++seq);
+  return fetch(url, {method: 'POST', cache: 'no-store'}).catch(() => {});
+}
+const OBJ_ANGLE = 60;
+const hist = new Array(120).fill(OPEN);
+
+/* Mandíbulas retas: apenas deslizam horizontalmente, sem rotação. */
+function pose(a){
+  const course = (a - CLOSE) / RANGE * 96;
+  $('jawL').setAttribute('transform', `translate(${-course} 0)`);
+  $('jawR').setAttribute('transform', `translate(${course} 0)`);
+}
+
+function frame(){
+  /* Simulação (só quando NÃO há emissor.py): segurar fecha; soltar volta a abrir */
+  if (!live){
+    if (holding){
+      if ($('objChk').checked && target <= OBJ_ANGLE + 2){
+        if (!contact){ contact = true; log('CONTACT ' + Math.round(target) + ' (simulado)'); }
+      } else {
+        contact = false;
+        target = Math.max(CLOSE, target - 1);
+      }
+    } else if (target < OPEN){
+      contact = false;
+      target = Math.min(OPEN, target + 2);
+    }
+  }
+  const diff = target - shown;
+  shown = Math.abs(diff) > .3 ? shown + Math.sign(diff) * Math.min(Math.abs(diff), 1.6) : target;
+  pose(shown);
+  const a = Math.round(shown), pct = Math.round((a - CLOSE) / RANGE * 100);
+  $('angTxt').textContent = a + '°';
+  $('openTxt').textContent = pct + '%';
+  $('barFill').style.width = pct + '%';
+  $('stateTxt').textContent = contact ? 'Objeto seguro' : a >= OPEN - 2 ? 'Aberta' : a <= CLOSE + 2 ? 'Fechada' : 'Em movimento';
+  requestAnimationFrame(frame);
+}
+frame();
+
+setInterval(() => {
+  hist.push(shown); hist.shift();
+  $('line').setAttribute('points', hist.map((v, i) => `${(i / 119 * 240).toFixed(1)},${(66 - (v - CLOSE) / RANGE * 62).toFixed(1)}`).join(' '));
+}, 100);
+
+function logRaw(t, cls){
+  const l = $('log'), s = document.createElement('div');
+  if (cls) s.className = cls;
+  s.textContent = t;
+  l.appendChild(s);
+  while (l.childNodes.length > 200) l.removeChild(l.firstChild);
+  l.scrollTop = l.scrollHeight;
+}
+function log(t, cls){ logRaw((cls === 'tx' ? 'TX ' : 'RX ') + t, cls); }
+
+/* ---------- Controle: segurar = abre, soltar = fecha ---------- */
+function startGrip(){
+  if (pressed || (live && !canControl)) return;
+  pressed = true;
+  $('bGrip').classList.add('on');
+  if (live){                       /* garra real: heartbeat enquanto segura */
+    post('/grip');
+    hbTimer = setInterval(() => post('/grip'), 100);
+  } else {                         /* simulação */
+    holding = true; contact = false; log('GRIP (fechando)', 'tx');
+  }
+}
+function stopGrip(){
+  if (!pressed) return;
+  pressed = false;
+  clearInterval(hbTimer);
+  $('bGrip').classList.remove('on');
+  if (live){
+    post('/release');
+  } else {
+    holding = false; log('RELEASE (abrindo)', 'tx');
+  }
+}
+
+const g = $('bGrip');
+g.addEventListener('pointerdown', e => { g.setPointerCapture(e.pointerId); startGrip(); });
+g.addEventListener('pointerup', stopGrip);
+g.addEventListener('pointercancel', stopGrip);
+g.addEventListener('contextmenu', e => e.preventDefault());
+window.addEventListener('blur', stopGrip);
+document.addEventListener('visibilitychange', () => { if (document.hidden) stopGrip(); });
+$('objChk').onchange = e => { $('obj').style.display = e.target.checked ? 'block' : 'none'; };
+document.addEventListener('keydown', e => {
+  if (e.code !== 'Space') return;
+  e.preventDefault();
+  if (!e.repeat) startGrip();
+});
+document.addEventListener('keyup', e => {
+  if (e.code !== 'Space') return;
+  e.preventDefault();
+  stopGrip();
+});
+
+/* ---------- Enlace com o emissor.py ---------- */
+function setLive(on){
+  live = on;
+  holding = false; contact = false;
+  if (!on) $('portTxt').textContent = '—';
+  if (pressed) stopGrip();
+  g.disabled = on && !canControl;
+  $('objChk').disabled = on;
+  $('dot').className = 'dot' + (on ? ' live' : '');
+  $('cmdMode').textContent = !on ? 'simulação' : canControl ? 'garra real' : 'só leitura';
+  $('cmdHint').textContent = !on || canControl
+    ? 'Segure a barra de espaço para fechar. Ao soltar, a garra abre.'
+    : 'Para comandar a garra, abra http://localhost:8765/ (como arquivo, esta página só mostra o estado).';
+  $('linkTxt').textContent = on ? 'emissor.py ao vivo' : 'Simulação';
+  logRaw(on ? 'Enlace com emissor.py estabelecido' : 'Sem emissor.py: modo simulação');
+}
+
+async function poll(){
+  try{
+    const r = await fetch(`${API}/state?since=${since}`, {cache: 'no-store'});
+    const s = await r.json();
+    if (!live) setLive(true);
+    $('portTxt').textContent = s.connected ? s.port : s.port + ' (sem sinal)';
+    $('linkTxt').textContent = s.connected ? 'emissor.py ao vivo' : 'Arduino desconectado';
+    $('dot').className = 'dot ' + (s.connected ? 'live' : 'warn');
+    target = s.angle; contact = s.contact; holding = s.gripping;
+    g.classList.toggle('on', s.gripping || pressed);
+    if (s.last) $('lastTxt').textContent = s.last.startsWith('OK') && s.latency_ms != null ? s.latency_ms + ' ms' : s.last.slice(0, 8);
+    s.log.forEach(([id, t]) => { logRaw(t, t.startsWith('TX') ? 'tx' : ''); since = Math.max(since, id); });
+    since = Math.max(since, s.log_id);
+  } catch(e){
+    if (live) setLive(false);
+  }
+  setTimeout(poll, live ? 100 : 1000);
+}
+poll();
+</script>
+</body>
+</html>

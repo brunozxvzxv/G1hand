@@ -1,0 +1,15 @@
+# Gerados pelo iniciar.py / iniciar.sh
+.build/
+iniciar_config.json
+arduino-cli
+arduino-cli.exe
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Editor / sistema
+.vscode/
+.idea/
+.DS_Store
